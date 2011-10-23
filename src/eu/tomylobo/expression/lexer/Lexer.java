@@ -19,6 +19,7 @@
 package eu.tomylobo.expression.lexer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,15 +43,28 @@ public class Lexer {
     }
 
     private final DecisionTree operatorTree = new DecisionTree(null,
-            '-', new DecisionTree("-"),
-            '+', new DecisionTree("+"),
-            '*', new DecisionTree("*",
-                    '*', new DecisionTree("^")
+            '+', new DecisionTree("+",
+                    '=', new DecisionTree("+="),
+                    '+', new DecisionTree("++")
             ),
-            '/', new DecisionTree("/"),
-            '%', new DecisionTree("%"),
-            '^', new DecisionTree("^"),
-            '=', new DecisionTree(null, // not implemented
+            '-', new DecisionTree("-",
+                    '=', new DecisionTree("-="),
+                    '-', new DecisionTree("--")
+            ),
+            '*', new DecisionTree("*",
+                    '=', new DecisionTree("*="),
+                    '*', new DecisionTree("**")
+            ),
+            '/', new DecisionTree("/",
+                    '=', new DecisionTree("/=")
+            ),
+            '%', new DecisionTree("%",
+                    '=', new DecisionTree("%=")
+            ),
+            '^', new DecisionTree("^",
+                    '=', new DecisionTree("^=")
+            ),
+            '=', new DecisionTree("=",
                     '=', new DecisionTree("==")
             ),
             '!', new DecisionTree("!",
@@ -80,7 +94,12 @@ public class Lexer {
         characterTokens.add(',');
         characterTokens.add('(');
         characterTokens.add(')');
+        characterTokens.add('{');
+        characterTokens.add('}');
+        characterTokens.add(';');
     }
+
+    private static final Set<String> keywords = new HashSet<String>(Arrays.asList("if", "else"));
 
     private static final Pattern numberPattern = Pattern.compile("^([0-9]*(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)");
     private static final Pattern identifierPattern = Pattern.compile("^([A-Za-z][0-9A-Za-z_]*)");
@@ -127,7 +146,12 @@ public class Lexer {
             if (identifierMatcher.lookingAt()) {
                 String identifierPart = identifierMatcher.group(1);
                 if (!identifierPart.isEmpty()) {
-                    tokens.add(new IdentifierToken(position, identifierPart));
+                    if (keywords.contains(identifierPart)) {
+                        tokens.add(new KeywordToken(position, identifierPart));
+                    }
+                    else {
+                        tokens.add(new IdentifierToken(position, identifierPart));
+                    }
 
                     position += identifierPart.length();
                     continue;

@@ -77,4 +77,8 @@ public class Expression {
     public String toString() {
         return root.toString();
     }
+
+    public Invokable getVariable(String name) {
+        return variables.get(name);
+    }
 }

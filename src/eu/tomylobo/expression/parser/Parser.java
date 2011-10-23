@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import eu.tomylobo.expression.Identifiable;
+import eu.tomylobo.expression.lexer.tokens.CharacterToken;
 import eu.tomylobo.expression.lexer.tokens.IdentifierToken;
 import eu.tomylobo.expression.lexer.tokens.NumberToken;
 import eu.tomylobo.expression.lexer.tokens.OperatorToken;
@@ -35,6 +36,7 @@ import eu.tomylobo.expression.runtime.Constant;
 import eu.tomylobo.expression.runtime.Functions;
 import eu.tomylobo.expression.runtime.Invokable;
 import eu.tomylobo.expression.runtime.Operators;
+import eu.tomylobo.expression.runtime.Sequence;
 
 public class Parser {
     private final class NullToken extends Token {
@@ -65,7 +67,7 @@ public class Parser {
     }
 
     private Invokable parse() throws ParserException {
-        final Invokable ret = parseInternal();
+        final Invokable ret = parseInternal(true);
         if (position < tokens.size()) {
             final Token token = peek();
             throw new ParserException(token.getPosition(), "Extra token at the end of the input: " + token);
@@ -73,7 +75,7 @@ public class Parser {
         return ret;
     }
 
-    private final Invokable parseInternal() throws ParserException {
+    private final Invokable parseInternal(boolean isStatement) throws ParserException {
         LinkedList<Identifiable> halfProcessed = new LinkedList<Identifiable>();
 
         // process brackets, numbers, functions, variables and detect prefix operators
@@ -111,8 +113,15 @@ public class Parser {
                 expressionStart = false;
                 break;
 
+            case '{':
+                halfProcessed.add(parseBlock());
+                halfProcessed.add(new CharacterToken(-1, ';'));
+                expressionStart = false;
+                break;
+
             case ',':
             case ')':
+            case '}':
                 break loop;
 
             case 'o':
@@ -134,8 +143,57 @@ public class Parser {
             }
         }
 
-        // process binary operators
-        return processBinaryOps(halfProcessed, binaryOpMaps.length - 1);
+        if (isStatement) {
+            return processStatement(halfProcessed);
+        }
+        else {
+            // process binary operators
+            return processExpression(halfProcessed);
+        }
+    }
+
+    private Invokable processStatement(LinkedList<Identifiable> input) throws ParserException {
+        LinkedList<Identifiable> lhs = new LinkedList<Identifiable>();
+        LinkedList<Identifiable> rhs = new LinkedList<Identifiable>();
+        boolean semicolonFound = false;
+
+        for (Iterator<Identifiable> it = input.descendingIterator(); it.hasNext();) {
+            Identifiable identifiable = it.next();
+            if (semicolonFound) {
+                lhs.addFirst(identifiable);
+            }
+            else {
+                if (identifiable.id() == ';') {
+                    semicolonFound = true;
+                }
+                else {
+                    rhs.addFirst(identifiable);
+                }
+            }
+        }
+
+        if (lhs.isEmpty()) {
+            if (rhs.isEmpty()) {
+                return new Sequence(semicolonFound ? input.get(0).getPosition() : -1);
+            }
+
+            return processExpression(rhs);
+        }
+        else if (rhs.isEmpty()) {
+            return processStatement(lhs);
+        }
+        else {
+            assert(semicolonFound);
+
+            Invokable rhsInvokable = processExpression(rhs);
+            Invokable lhsInvokable = processStatement(lhs);
+
+            return new Sequence(position, lhsInvokable, rhsInvokable);
+        }
+    }
+
+    private Invokable processExpression(LinkedList<Identifiable> input) throws ParserException {
+        return processBinaryOps(input, binaryOpMaps.length - 1);
     }
 
     private static final Map<String, String>[] binaryOpMaps;
@@ -145,6 +203,7 @@ public class Parser {
         final Object[][][] binaryOps = {
                 {
                     { "^", "pow" },
+                    { "**", "pow" },
                 },
                 {
                     { "*", "mul" },
@@ -176,6 +235,15 @@ public class Parser {
                 {
                     { "||", "or" },
                 },
+                {
+                    { "=", "ass" },
+                    { "+=", "aadd" },
+                    { "-=", "asub" },
+                    { "*=", "amul" },
+                    { "/=", "adiv" },
+                    { "%=", "amod" },
+                    { "^=", "aexp" },
+                },
         };
 
         @SuppressWarnings("unchecked")
@@ -204,6 +272,8 @@ public class Parser {
         unaryOpMap.put("-", "neg");
         unaryOpMap.put("!", "not");
         unaryOpMap.put("~", "inv");
+        unaryOpMap.put("++", "inc");
+        unaryOpMap.put("--", "dec");
     }
 
     private Invokable processBinaryOps(LinkedList<Identifiable> input, int level) throws ParserException {
@@ -314,7 +384,7 @@ public class Parser {
             List<Invokable> args = new ArrayList<Invokable>();
 
             loop: while (true) {
-                args.add(parseInternal());
+                args.add(parseInternal(false));
 
                 final Token current = peek();
                 ++position;
@@ -344,10 +414,26 @@ public class Parser {
         }
         ++position;
 
-        final Invokable ret = parseInternal();
+        final Invokable ret = parseInternal(false);
 
         if (peek().id() != ')') {
             throw new ParserException(peek().getPosition(), "Unmatched opening bracket");
+        }
+        ++position;
+
+        return ret;
+    }
+
+    private final Invokable parseBlock() throws ParserException {
+        if (peek().id() != '{') {
+            throw new ParserException(peek().getPosition(), "Unexpected character in parseBlock");
+        }
+        ++position;
+
+        final Invokable ret = parseInternal(true);
+
+        if (peek().id() != '}') {
+            throw new ParserException(peek().getPosition(), "Unmatched opening brace");
         }
         ++position;
 
