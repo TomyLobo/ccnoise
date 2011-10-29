@@ -21,6 +21,11 @@ package eu.tomylobo.expression.runtime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A sequence of operations, usually separated by semicolons in the input stream.
+ *
+ * @author TomyLobo
+ */
 public class Sequence extends RValue {
     private final RValue[] sequence;
 
@@ -32,8 +37,7 @@ public class Sequence extends RValue {
 
     @Override
     public char id() {
-        // TODO Auto-generated method stub
-        return 0;
+        return 's';
     }
 
     @Override

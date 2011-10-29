@@ -18,6 +18,11 @@
 
 package eu.tomylobo.expression.lexer.tokens;
 
+/**
+ * A number
+ *
+ * @author TomyLobo
+ */
 public class NumberToken extends Token {
     public final double value;
 

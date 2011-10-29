@@ -33,6 +33,13 @@ import eu.tomylobo.expression.runtime.Constant;
 import eu.tomylobo.expression.runtime.Functions;
 import eu.tomylobo.expression.runtime.RValue;
 
+/**
+ * Processes a list of tokens into an executable tree.
+ *
+ * Tokens can be numbers, identifiers, operators and assorted other characters.
+ *
+ * @author TomyLobo
+ */
 public class Parser {
     private final class NullToken extends Token {
         private NullToken(int position) {

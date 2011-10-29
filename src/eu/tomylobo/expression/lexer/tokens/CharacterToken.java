@@ -18,6 +18,11 @@
 
 package eu.tomylobo.expression.lexer.tokens;
 
+/**
+ * A single character that doesn't fit any of the other token categories.
+ *
+ * @author TomyLobo
+ */
 public class CharacterToken extends Token {
     public final char character;
 

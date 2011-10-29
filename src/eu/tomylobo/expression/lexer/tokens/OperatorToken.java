@@ -18,6 +18,11 @@
 
 package eu.tomylobo.expression.lexer.tokens;
 
+/**
+ * A unary or binary operator.
+ *
+ * @author TomyLobo
+ */
 public class OperatorToken extends Token {
     public final String operator;
 

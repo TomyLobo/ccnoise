@@ -18,6 +18,11 @@
 
 package eu.tomylobo.expression.runtime;
 
+/**
+ * A value that can be used on the left side of an assignment.
+ *
+ * @author TomyLobo
+ */
 public abstract class LValue extends RValue {
     public LValue(int position) {
         super(position);

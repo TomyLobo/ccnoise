@@ -13,6 +13,11 @@ import eu.tomylobo.expression.runtime.RValue;
 import eu.tomylobo.expression.runtime.Operators;
 import eu.tomylobo.expression.runtime.Sequence;
 
+/**
+ * Helper classfor Parser. Contains processors for statements and operators.
+ *
+ * @author TomyLobo
+ */
 public final class ParserProcessors {
     private static final Map<String, String> unaryOpMap = new HashMap<String, String>();
 

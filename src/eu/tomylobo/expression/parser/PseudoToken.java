@@ -20,6 +20,11 @@ package eu.tomylobo.expression.parser;
 
 import eu.tomylobo.expression.Identifiable;
 
+/**
+ * A pseudo-token, inserted by the parser instead of the lexer.
+ *
+ * @author TomyLobo
+ */
 public abstract class PseudoToken implements Identifiable {
     private final int position;
 

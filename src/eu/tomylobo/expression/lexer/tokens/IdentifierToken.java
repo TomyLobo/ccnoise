@@ -18,6 +18,11 @@
 
 package eu.tomylobo.expression.lexer.tokens;
 
+/**
+ * An identifier
+ *
+ * @author TomyLobo
+ */
 public class IdentifierToken extends Token {
     public final String value;
 

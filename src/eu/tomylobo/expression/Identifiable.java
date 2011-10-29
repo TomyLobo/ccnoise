@@ -18,6 +18,11 @@
 
 package eu.tomylobo.expression;
 
+/**
+ * A common superinterface for everything passed to parser processors.
+ *
+ * @author TomyLobo
+ */
 public interface Identifiable {
     /**
      * Returns a character that helps identify the token, pseudo-token or invokable in question.

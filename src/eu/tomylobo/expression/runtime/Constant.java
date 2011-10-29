@@ -18,6 +18,11 @@
 
 package eu.tomylobo.expression.runtime;
 
+/**
+ * A constant.
+ *
+ * @author TomyLobo
+ */
 public final class Constant extends RValue {
     private final double value;
 

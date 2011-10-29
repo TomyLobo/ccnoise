@@ -20,6 +20,11 @@ package eu.tomylobo.expression.runtime;
 
 import eu.tomylobo.expression.Identifiable;
 
+/**
+ * A value that can be used on the right side of an assignment.
+ *
+ * @author TomyLobo
+ */
 public abstract class RValue implements Identifiable {
     private final int position;
 

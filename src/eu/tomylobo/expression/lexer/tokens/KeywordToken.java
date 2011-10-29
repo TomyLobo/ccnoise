@@ -18,6 +18,11 @@
 
 package eu.tomylobo.expression.lexer.tokens;
 
+/**
+ * A keyword
+ *
+ * @author TomyLobo
+ */
 public class KeywordToken extends Token {
     public final String value;
 
@@ -28,7 +33,7 @@ public class KeywordToken extends Token {
 
     @Override
     public char id() {
-        return 'i';
+        return 'k';
     }
 
     @Override

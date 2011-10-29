@@ -2,6 +2,11 @@ package eu.tomylobo.expression.runtime;
 
 import eu.tomylobo.expression.ExpressionException;
 
+/**
+ * Thrown when there's a problem during expression evaluation.
+ *
+ * @author TomyLobo
+ */
 public class EvaluationException extends ExpressionException {
     private static final long serialVersionUID = 1L;
 

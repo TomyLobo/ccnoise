@@ -20,6 +20,11 @@ package eu.tomylobo.expression.lexer.tokens;
 
 import eu.tomylobo.expression.Identifiable;
 
+/**
+ * A token. The lexer generates these to make the parser's job easier.
+ *
+ * @author TomyLobo
+ */
 public abstract class Token implements Identifiable {
     private final int position;
 

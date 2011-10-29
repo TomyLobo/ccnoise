@@ -2,6 +2,11 @@ package eu.tomylobo.expression.parser;
 
 import eu.tomylobo.expression.lexer.tokens.OperatorToken;
 
+/**
+ * The parser uses this pseudo-token to mark operators as prefix operators.
+ *
+ * @author TomyLobo
+ */
 public class PrefixOperator extends PseudoToken {
     final String operator;
 

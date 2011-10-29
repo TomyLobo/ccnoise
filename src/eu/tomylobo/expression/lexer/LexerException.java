@@ -20,6 +20,11 @@ package eu.tomylobo.expression.lexer;
 
 import eu.tomylobo.expression.ExpressionException;
 
+/**
+ * Thrown when the lexer encounters a problem.
+ *
+ * @author TomyLobo
+ */
 public class LexerException extends ExpressionException {
     private static final long serialVersionUID = 1L;
 
