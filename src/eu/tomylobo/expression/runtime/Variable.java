@@ -18,7 +18,7 @@
 
 package eu.tomylobo.expression.runtime;
 
-public final class Variable extends Assignable {
+public final class Variable extends LValue {
     public double value;
 
     public Variable(double value) {
