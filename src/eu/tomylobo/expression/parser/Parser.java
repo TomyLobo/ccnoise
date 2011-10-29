@@ -32,6 +32,7 @@ import eu.tomylobo.expression.lexer.tokens.Token;
 import eu.tomylobo.expression.runtime.Constant;
 import eu.tomylobo.expression.runtime.Functions;
 import eu.tomylobo.expression.runtime.RValue;
+import eu.tomylobo.expression.runtime.Variable;
 
 /**
  * Processes a list of tokens into an executable tree.
@@ -103,7 +104,12 @@ public class Parser {
                 else {
                     RValue variable = variables.get(identifierToken.value);
                     if (variable == null) {
-                        throw new ParserException(current.getPosition(), "Variable '" + identifierToken.value + "' not found");
+                        if (next instanceof OperatorToken && ((OperatorToken)next).operator.equals("=")) {
+                            // Ugly hack to make temporary variables work while not sacrificing error reporting.
+                            variables.put(identifierToken.value, variable = new Variable(0));
+                        } else {
+                            throw new ParserException(current.getPosition(), "Variable '" + identifierToken.value + "' not found");
+                        }
                     }
                     halfProcessed.add(variable);
                 }
