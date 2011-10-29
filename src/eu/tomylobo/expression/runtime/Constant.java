@@ -27,7 +27,7 @@ public final class Constant extends RValue {
     }
 
     @Override
-    public double invoke() {
+    public double getValue() {
         return value;
     }
 

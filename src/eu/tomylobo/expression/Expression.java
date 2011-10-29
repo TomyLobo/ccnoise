@@ -66,7 +66,7 @@ public class Expression {
             ((Variable) invokable).value = values[i];
         }
 
-        return root.invoke();
+        return root.getValue();
     }
 
     public void optimize() throws EvaluationException {

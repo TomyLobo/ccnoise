@@ -37,7 +37,7 @@ public class Function extends RValue {
     }
 
     @Override
-    public final double invoke() throws EvaluationException {
+    public final double getValue() throws EvaluationException {
         try {
             return (Double) method.invoke(null, (Object[]) args);
         }
@@ -89,7 +89,7 @@ public class Function extends RValue {
         }
 
         if (optimizable) {
-            return new Constant(position, invoke());
+            return new Constant(position, getValue());
         }
         else {
             return new Function(position, method, optimizedArgs);
