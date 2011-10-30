@@ -11,7 +11,6 @@ import eu.tomylobo.expression.lexer.tokens.OperatorToken;
 import eu.tomylobo.expression.lexer.tokens.Token;
 import eu.tomylobo.expression.runtime.RValue;
 import eu.tomylobo.expression.runtime.Operators;
-import eu.tomylobo.expression.runtime.Sequence;
 
 /**
  * Helper classfor Parser. Contains processors for statements and operators.
@@ -30,6 +29,9 @@ public final class ParserProcessors {
         unaryOpMap.put("~", "inv");
         unaryOpMap.put("++", "inc");
         unaryOpMap.put("--", "dec");
+        unaryOpMap.put("x++", "postinc");
+        unaryOpMap.put("x--", "postdec");
+        unaryOpMap.put("x!", "fac");
 
         final Object[][][] binaryOpsLA = {
                 {
@@ -123,45 +125,6 @@ public final class ParserProcessors {
                     m.put((String) element[0], (String) element[1]);
                 }
             }
-        }
-    }
-
-    static RValue processStatement(LinkedList<Identifiable> input) throws ParserException {
-        LinkedList<Identifiable> lhs = new LinkedList<Identifiable>();
-        LinkedList<Identifiable> rhs = new LinkedList<Identifiable>();
-        boolean semicolonFound = false;
-
-        for (Identifiable identifiable : input) {
-            if (semicolonFound) {
-                rhs.addLast(identifiable);
-            }
-            else {
-                if (identifiable.id() == ';') {
-                    semicolonFound = true;
-                }
-                else {
-                    lhs.addLast(identifiable);
-                }
-            }
-        }
-
-        if (rhs.isEmpty()) {
-            if (lhs.isEmpty()) {
-                return new Sequence(semicolonFound ? input.get(0).getPosition() : -1);
-            }
-
-            return processExpression(lhs);
-        }
-        else if (lhs.isEmpty()) {
-            return processStatement(rhs);
-        }
-        else {
-            assert(semicolonFound);
-
-            RValue lhsInvokable = processExpression(lhs);
-            RValue rhsInvokable = processStatement(rhs);
-
-            return new Sequence(lhsInvokable.getPosition(), lhsInvokable, rhsInvokable);
         }
     }
 
@@ -261,16 +224,41 @@ public final class ParserProcessors {
     }
 
     private static RValue processUnaryOps(LinkedList<Identifiable> input) throws ParserException {
-        if (input.isEmpty()) {
-            throw new ParserException(-1, "Expression missing.");
+        // Preprocess postfix operators into prefix operators
+        final Identifiable center;
+        LinkedList<UnaryOperator> postfixes = new LinkedList<UnaryOperator>();
+        do {
+            if (input.isEmpty()) {
+                throw new ParserException(-1, "Expression missing.");
+            }
+
+            final Identifiable last = input.removeLast();
+            if (last instanceof OperatorToken) {
+                System.out.println("Found postfix: "+last);
+                postfixes.addFirst(new UnaryOperator(last.getPosition(), "x"+((OperatorToken)last).operator));
+            }
+            else if (last instanceof UnaryOperator) {
+                System.out.println("Found postfix: "+last);
+                postfixes.addFirst(new UnaryOperator(last.getPosition(), "x"+((UnaryOperator)last).operator));
+            }
+            else {
+                center = last;
+                break;
+            }
+        } while (true);
+
+        if (!(center instanceof RValue)) {
+            throw new ParserException(center.getPosition(), "Expected expression, found "+center);
         }
 
-        RValue ret = (RValue) input.removeLast();
+        input.addAll(postfixes);
+
+        RValue ret = (RValue) center;
         while (!input.isEmpty()) {
             final Identifiable last = input.removeLast();
             final int lastPosition = last.getPosition();
-            if (last instanceof PrefixOperator) {
-                final String operator = ((PrefixOperator) last).operator;
+            if (last instanceof UnaryOperator) {
+                final String operator = ((UnaryOperator) last).operator;
                 if (operator.equals("+")) {
                     continue;
                 }

@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import eu.tomylobo.expression.Identifiable;
-import eu.tomylobo.expression.lexer.tokens.CharacterToken;
 import eu.tomylobo.expression.lexer.tokens.IdentifierToken;
 import eu.tomylobo.expression.lexer.tokens.NumberToken;
 import eu.tomylobo.expression.lexer.tokens.OperatorToken;
@@ -32,6 +31,7 @@ import eu.tomylobo.expression.lexer.tokens.Token;
 import eu.tomylobo.expression.runtime.Constant;
 import eu.tomylobo.expression.runtime.Functions;
 import eu.tomylobo.expression.runtime.RValue;
+import eu.tomylobo.expression.runtime.Sequence;
 import eu.tomylobo.expression.runtime.Variable;
 
 /**
@@ -70,7 +70,7 @@ public class Parser {
     }
 
     private RValue parse() throws ParserException {
-        final RValue ret = parseInternal(true);
+        final RValue ret = parseMultipleStatements();
         if (position < tokens.size()) {
             final Token token = peek();
             throw new ParserException(token.getPosition(), "Extra token at the end of the input: " + token);
@@ -78,7 +78,44 @@ public class Parser {
         return ret;
     }
 
-    private final RValue parseInternal(boolean isStatement) throws ParserException {
+    private RValue parseMultipleStatements() throws ParserException {
+        List<RValue> statements = new ArrayList<RValue>();
+        loop: while (true) {
+            if (position >= tokens.size()) {
+                break;
+            }
+
+            switch (peek().id()) {
+            case ';':
+                ++position;
+                break;
+
+            case '{':
+                statements.add(parseBlock());
+                break;
+
+            case '}':
+                break loop;
+
+            default:
+                statements.add(parseExpression());
+                break;
+            }
+        }
+
+        switch (statements.size()) {
+        case 0:
+            throw new ParserException(-1, "No statement found.");
+
+        case 1:
+            return statements.get(0);
+
+        default:
+            return new Sequence(position, statements.toArray(new RValue[statements.size()]));
+        }
+    }
+
+    private final RValue parseExpression() throws ParserException {
         LinkedList<Identifiable> halfProcessed = new LinkedList<Identifiable>();
 
         // process brackets, numbers, functions, variables and detect prefix operators
@@ -121,20 +158,15 @@ public class Parser {
                 expressionStart = false;
                 break;
 
-            case '{':
-                halfProcessed.add(parseBlock());
-                halfProcessed.add(new CharacterToken(-1, ';'));
-                expressionStart = false;
-                break;
-
             case ',':
             case ')':
             case '}':
+            case ';':
                 break loop;
 
             case 'o':
                 if (expressionStart) {
-                    halfProcessed.add(new PrefixOperator((OperatorToken) current));
+                    halfProcessed.add(new UnaryOperator((OperatorToken) current));
                 }
                 else {
                     halfProcessed.add(current);
@@ -151,12 +183,7 @@ public class Parser {
             }
         }
 
-        if (isStatement) {
-            return ParserProcessors.processStatement(halfProcessed);
-        }
-        else {
-            return ParserProcessors.processExpression(halfProcessed);
-        }
+        return ParserProcessors.processExpression(halfProcessed);
     }
 
 
@@ -182,7 +209,7 @@ public class Parser {
             List<RValue> args = new ArrayList<RValue>();
 
             loop: while (true) {
-                args.add(parseInternal(false));
+                args.add(parseExpression());
 
                 final Token current = peek();
                 ++position;
@@ -212,7 +239,7 @@ public class Parser {
         }
         ++position;
 
-        final RValue ret = parseInternal(false);
+        final RValue ret = parseExpression();
 
         if (peek().id() != ')') {
             throw new ParserException(peek().getPosition(), "Unmatched opening bracket");
@@ -228,7 +255,11 @@ public class Parser {
         }
         ++position;
 
-        final RValue ret = parseInternal(true);
+        if (peek().id() == '}') {
+            return new Sequence(peek().getPosition());
+        }
+
+        final RValue ret = parseMultipleStatements();
 
         if (peek().id() != '}') {
             throw new ParserException(peek().getPosition(), "Unmatched opening brace");
