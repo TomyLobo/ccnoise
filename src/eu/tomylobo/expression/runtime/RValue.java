@@ -25,25 +25,7 @@ import eu.tomylobo.expression.Identifiable;
  *
  * @author TomyLobo
  */
-public abstract class RValue implements Identifiable {
-    private final int position;
-
-    public RValue(int position) {
-        super();
-        this.position = position;
-    }
-
-    public abstract double getValue() throws EvaluationException;
-
-    @Override
-    public abstract String toString();
-
-    public RValue optimize() throws EvaluationException {
-        return this;
-    }
-
-    @Override
-    public int getPosition() {
-        return position;
-    }
+public interface RValue extends Identifiable {
+    public double getValue() throws EvaluationException;
+    public Node optimize() throws EvaluationException;
 }

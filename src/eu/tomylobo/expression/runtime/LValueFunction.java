@@ -18,31 +18,33 @@
 
 package eu.tomylobo.expression.runtime;
 
+import java.lang.reflect.Method;
+
 /**
- * A constant.
+ * Wrapper for a Java method and its arguments (other Invokables)
  *
  * @author TomyLobo
  */
-public final class Constant extends Node {
-    private final double value;
+public class LValueFunction extends Function implements LValue {
+    private final Object[] setterArgs;
+    final Method setter;
 
-    public Constant(int position, double value) {
-        super(position);
-        this.value = value;
-    }
+    LValueFunction(int position, Method getter, Method setter, RValue... args) {
+        super(position, getter, args);
 
-    @Override
-    public double getValue() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
+        setterArgs = new Object[args.length + 1];
+        System.arraycopy(args, 0, setterArgs, 0, args.length);
+        this.setter = setter;
     }
 
     @Override
     public char id() {
-        return 'c';
+        return 'l';
+    }
+
+    @Override
+    public double assign(double value) throws EvaluationException {
+        setterArgs[setterArgs.length - 1] = value;
+        return invokeMethod(setter, setterArgs);
     }
 }

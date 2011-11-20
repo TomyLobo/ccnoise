@@ -16,36 +16,29 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-package eu.tomylobo.expression;
+package eu.tomylobo.expression.runtime;
 
 /**
- * A common superinterface for everything passed to parser processors.
+ * A value that can be used on the right side of an assignment.
  *
  * @author TomyLobo
  */
-public interface Identifiable {
-    /**
-     * Returns a character that helps identify the token, pseudo-token or invokable in question.
-     *
-     * <pre>
-     * Tokens:
-     * i - IdentifierToken
-     * 0 - NumberToken
-     * o - OperatorToken
-     * \0 - NullToken
-     * CharacterTokens are returned literally
-     *
-     * PseudoTokens:
-     * p - PrefixOperator
-     *
-     * Invokables:
-     * c - Constant
-     * v - Variable
-     * f - Function
-     * l - LValueFunction
-     * </pre>
-     */
-    public abstract char id();
+public abstract class Node implements RValue {
+    private final int position;
 
-    public int getPosition();
+    public Node(int position) {
+        this.position = position;
+    }
+
+    @Override
+    public abstract String toString();
+
+    public Node optimize() throws EvaluationException {
+        return this;
+    }
+
+    @Override
+    public int getPosition() {
+        return position;
+    }
 }

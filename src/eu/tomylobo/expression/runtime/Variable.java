@@ -23,7 +23,7 @@ package eu.tomylobo.expression.runtime;
  *
  * @author TomyLobo
  */
-public final class Variable extends LValue {
+public final class Variable extends Node implements LValue {
     public double value;
 
     public Variable(double value) {
