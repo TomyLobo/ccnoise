@@ -28,6 +28,7 @@ import eu.tomylobo.expression.parser.Parser;
 import eu.tomylobo.expression.runtime.Constant;
 import eu.tomylobo.expression.runtime.EvaluationException;
 import eu.tomylobo.expression.runtime.RValue;
+import eu.tomylobo.expression.runtime.ReturnException;
 import eu.tomylobo.expression.runtime.Variable;
 
 /**
@@ -96,7 +97,12 @@ public class Expression {
             ((Variable) invokable).value = values[i];
         }
 
-        return root.getValue();
+        try {
+            return root.getValue();
+        }
+        catch (ReturnException e) {
+            return e.getValue();
+        }
     }
 
     public void optimize() throws EvaluationException {

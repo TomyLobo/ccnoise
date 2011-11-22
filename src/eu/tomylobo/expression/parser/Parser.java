@@ -29,11 +29,13 @@ import eu.tomylobo.expression.lexer.tokens.KeywordToken;
 import eu.tomylobo.expression.lexer.tokens.NumberToken;
 import eu.tomylobo.expression.lexer.tokens.OperatorToken;
 import eu.tomylobo.expression.lexer.tokens.Token;
+import eu.tomylobo.expression.runtime.Break;
 import eu.tomylobo.expression.runtime.Conditional;
 import eu.tomylobo.expression.runtime.Constant;
 import eu.tomylobo.expression.runtime.For;
 import eu.tomylobo.expression.runtime.Functions;
 import eu.tomylobo.expression.runtime.RValue;
+import eu.tomylobo.expression.runtime.Return;
 import eu.tomylobo.expression.runtime.Sequence;
 import eu.tomylobo.expression.runtime.Variable;
 import eu.tomylobo.expression.runtime.While;
@@ -161,6 +163,28 @@ public class Parser {
                     statements.add(new For(current.getPosition(), init, condition, increment, body));
                     break;
                 }
+
+                case 'b': // break
+                    ++position;
+                    statements.add(new Break(current.getPosition(), false));
+                    break;
+
+                case 'c': // continue
+                    ++position;
+                    statements.add(new Break(current.getPosition(), true));
+                    break;
+
+                case 'r': // return
+                    ++position;
+                    statements.add(new Return(current.getPosition(), parseExpression(true)));
+
+                    if (peek().id() == ';') {
+                        ++position;
+                        break;
+                    }
+                    else {
+                        break loop;
+                    }
 
                 default:
                     throw new ParserException(current.getPosition(), "Unimplemented keyword '" + keyword + "'");
