@@ -25,9 +25,11 @@ import java.util.Map;
 
 import eu.tomylobo.expression.Identifiable;
 import eu.tomylobo.expression.lexer.tokens.IdentifierToken;
+import eu.tomylobo.expression.lexer.tokens.KeywordToken;
 import eu.tomylobo.expression.lexer.tokens.NumberToken;
 import eu.tomylobo.expression.lexer.tokens.OperatorToken;
 import eu.tomylobo.expression.lexer.tokens.Token;
+import eu.tomylobo.expression.runtime.Conditional;
 import eu.tomylobo.expression.runtime.Constant;
 import eu.tomylobo.expression.runtime.Functions;
 import eu.tomylobo.expression.runtime.RValue;
@@ -70,7 +72,7 @@ public class Parser {
     }
 
     private RValue parse() throws ParserException {
-        final RValue ret = parseMultipleStatements();
+        final RValue ret = parseStatements(false);
         if (position < tokens.size()) {
             final Token token = peek();
             throw new ParserException(token.getPosition(), "Extra token at the end of the input: " + token);
@@ -78,28 +80,76 @@ public class Parser {
         return ret;
     }
 
-    private RValue parseMultipleStatements() throws ParserException {
+    private RValue parseStatements(boolean singleStatement) throws ParserException {
         List<RValue> statements = new ArrayList<RValue>();
         loop: while (true) {
             if (position >= tokens.size()) {
                 break;
             }
 
-            switch (peek().id()) {
+            final Token current = peek();
+            switch (current.id()) {
             case ';':
                 ++position;
+
+                if (singleStatement) {
+                    break loop;
+                }
                 break;
 
             case '{':
                 statements.add(parseBlock());
+
+                if (singleStatement) {
+                    break loop;
+                }
                 break;
 
             case '}':
                 break loop;
 
+            case 'k':
+                final String keyword = ((KeywordToken) current).value;
+                switch (keyword.charAt(0)) {
+                case 'i': // if
+                    ++position;
+                    final RValue condition = parseBracket();
+                    final RValue truePart = parseStatements(true);
+                    final RValue falsePart;
+
+                    final Token next = peek();
+                    if ((next instanceof KeywordToken) && ((KeywordToken) next).value.equals("else")) {
+                        ++position;
+                        falsePart = parseStatements(true);
+                    } else {
+                        falsePart = null;
+                    }
+
+                    statements.add(new Conditional(current.getPosition(), condition, truePart, falsePart));
+                    break;
+
+                default:
+                    throw new ParserException(current.getPosition(), "Unimplemented keyword '" + keyword + "'");
+                }
+
+                if (singleStatement) {
+                    break loop;
+                }
+                break;
+
             default:
                 statements.add(parseExpression());
-                break;
+                
+                if (peek().id() == ';') {
+                    ++position;
+                    if (singleStatement) {
+                        break loop;
+                    }
+                    break;
+                }
+                else {
+                    break loop;
+                }
             }
         }
 
@@ -260,7 +310,7 @@ public class Parser {
             return new Sequence(peek().getPosition());
         }
 
-        final RValue ret = parseMultipleStatements();
+        final RValue ret = parseStatements(false);
 
         if (peek().id() != '}') {
             throw new ParserException(peek().getPosition(), "Unmatched opening brace");
