@@ -31,6 +31,7 @@ import eu.tomylobo.expression.lexer.tokens.OperatorToken;
 import eu.tomylobo.expression.lexer.tokens.Token;
 import eu.tomylobo.expression.runtime.Conditional;
 import eu.tomylobo.expression.runtime.Constant;
+import eu.tomylobo.expression.runtime.For;
 import eu.tomylobo.expression.runtime.Functions;
 import eu.tomylobo.expression.runtime.RValue;
 import eu.tomylobo.expression.runtime.Sequence;
@@ -118,8 +119,7 @@ public class Parser {
                     final RValue truePart = parseStatements(true);
                     final RValue falsePart;
 
-                    final Token next = peek();
-                    if ((next instanceof KeywordToken) && ((KeywordToken) next).value.equals("else")) {
+                    if (hasKeyword("else")) {
                         ++position;
                         falsePart = parseStatements(true);
                     } else {
@@ -143,14 +143,26 @@ public class Parser {
                     ++position;
                     final RValue body = parseStatements(true);
 
-                    final Token next = peek();
-                    if (!(next instanceof KeywordToken) || !((KeywordToken) next).value.equals("while")) {
-                        throw new ParserException(current.getPosition(), "Expected while");
-                    }
-                    ++position;
+                    consumeKeyword("while");
+
                     final RValue condition = parseBracket();
 
                     statements.add(new While(current.getPosition(), condition, body, true));
+                    break;
+                }
+
+                case 'f': { // for
+                    ++position;
+                    consumeCharacter('(');
+                    final RValue init = parseExpression();
+                    consumeCharacter(';');
+                    final RValue condition = parseExpression();
+                    consumeCharacter(';');
+                    final RValue increment = parseExpression();
+                    consumeCharacter(')');
+                    final RValue body = parseStatements(true);
+
+                    statements.add(new For(current.getPosition(), init, condition, increment, body));
                     break;
                 }
 
@@ -273,10 +285,7 @@ public class Parser {
     }
 
     private Identifiable parseFunctionCall(IdentifierToken identifierToken) throws ParserException {
-        if (peek().id() != '(') {
-            throw new ParserException(peek().getPosition(), "Unexpected character in parseFunctionCall");
-        }
-        ++position;
+        consumeCharacter('(');
 
         try {
             if (peek().id() == ')') {
@@ -311,26 +320,17 @@ public class Parser {
     }
 
     private final RValue parseBracket() throws ParserException {
-        if (peek().id() != '(') {
-            throw new ParserException(peek().getPosition(), "Unexpected character in parseBracket");
-        }
-        ++position;
+        consumeCharacter('(');
 
         final RValue ret = parseExpression();
 
-        if (peek().id() != ')') {
-            throw new ParserException(peek().getPosition(), "Unmatched opening bracket");
-        }
-        ++position;
+        consumeCharacter(')');
 
         return ret;
     }
 
     private final RValue parseBlock() throws ParserException {
-        if (peek().id() != '{') {
-            throw new ParserException(peek().getPosition(), "Unexpected character in parseBlock");
-        }
-        ++position;
+        consumeCharacter('{');
 
         if (peek().id() == '}') {
             return new Sequence(peek().getPosition());
@@ -338,11 +338,39 @@ public class Parser {
 
         final RValue ret = parseStatements(false);
 
-        if (peek().id() != '}') {
-            throw new ParserException(peek().getPosition(), "Unmatched opening brace");
-        }
-        ++position;
+        consumeCharacter('}');
 
         return ret;
+    }
+
+    private boolean hasKeyword(String keyword) {
+        final Token next = peek();
+        if (!(next instanceof KeywordToken)) {
+            return false;
+        }
+        return ((KeywordToken) next).value.equals(keyword);
+    }
+
+    private void assertCharacter(char character) throws ParserException {
+        final Token next = peek();
+        if (next.id() != character) {
+            throw new ParserException(next.getPosition(), "Expected '" + character + "'");
+        }
+    }
+
+    private void assertKeyword(String keyword) throws ParserException {
+        if (!hasKeyword(keyword)) {
+            throw new ParserException(peek().getPosition(), "Expected '" + keyword + "'");
+        }
+    }
+
+    private void consumeCharacter(char character) throws ParserException {
+        assertCharacter(character);
+        ++position;
+    }
+
+    private void consumeKeyword(String keyword) throws ParserException {
+        assertKeyword(keyword);
+        ++position;
     }
 }
