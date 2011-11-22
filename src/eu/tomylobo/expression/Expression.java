@@ -25,7 +25,6 @@ import java.util.Map;
 import eu.tomylobo.expression.lexer.Lexer;
 import eu.tomylobo.expression.lexer.tokens.Token;
 import eu.tomylobo.expression.parser.Parser;
-import eu.tomylobo.expression.parser.ParserException;
 import eu.tomylobo.expression.runtime.Constant;
 import eu.tomylobo.expression.runtime.EvaluationException;
 import eu.tomylobo.expression.runtime.RValue;
@@ -68,13 +67,18 @@ public class Expression {
         this(Lexer.tokenize(expression), variableNames);
     }
 
-    private Expression(List<Token> tokens, String... variableNames) throws ParserException {
+    private Expression(List<Token> tokens, String... variableNames) throws ExpressionException {
         this.variableNames = variableNames;
+
         variables.put("e", new Constant(-1, Math.E));
         variables.put("pi", new Constant(-1, Math.PI));
         variables.put("true", new Constant(-1, 1));
         variables.put("false", new Constant(-1, 0));
+
         for (String variableName : variableNames) {
+            if (variables.containsKey(variableName)) {
+                throw new ExpressionException(-1, "Tried to overwrite identifier '" + variableName + "'");
+            }
             variables.put(variableName, new Variable(0));
         }
 
