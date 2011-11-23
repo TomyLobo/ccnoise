@@ -99,8 +99,7 @@ public class Expression {
 
         try {
             return root.getValue();
-        }
-        catch (ReturnException e) {
+        } catch (ReturnException e) {
             return e.getValue();
         }
     }

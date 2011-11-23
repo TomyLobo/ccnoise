@@ -33,7 +33,7 @@ import eu.tomylobo.expression.runtime.Function.Dynamic;
  */
 public final class Functions {
     private static class Overload {
-        private final Method method; 
+        private final Method method;
         private final int mask;
         private final boolean isSetter;
 
@@ -89,14 +89,12 @@ public final class Functions {
         }
     }
 
-
     public static final Function getFunction(int position, String name, RValue... args) throws NoSuchMethodException {
         final Method getter = getMethod(name, false, args);
         try {
             Method setter = getMethod(name, true, args);
             return new LValueFunction(position, getter, setter, args);
-        }
-        catch (NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             return new Function(position, getter, args);
         }
     }
