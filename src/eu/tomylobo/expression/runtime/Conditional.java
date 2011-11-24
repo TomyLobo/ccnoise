@@ -19,7 +19,7 @@
 package eu.tomylobo.expression.runtime;
 
 /**
- * An if/else statement.
+ * An if/else statement or a ternary operator.
  *
  * @author TomyLobo
  */
