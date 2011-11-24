@@ -28,5 +28,5 @@ import eu.tomylobo.expression.Identifiable;
 public interface RValue extends Identifiable {
     public double getValue() throws EvaluationException;
 
-    public Node optimize() throws EvaluationException;
+    public RValue optimize() throws EvaluationException;
 }
