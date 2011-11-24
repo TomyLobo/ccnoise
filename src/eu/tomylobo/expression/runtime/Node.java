@@ -19,7 +19,7 @@
 package eu.tomylobo.expression.runtime;
 
 /**
- * A value that can be used on the right side of an assignment.
+ * A node in the execution tree of an expression.
  *
  * @author TomyLobo
  */

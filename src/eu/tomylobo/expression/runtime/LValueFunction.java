@@ -21,7 +21,7 @@ package eu.tomylobo.expression.runtime;
 import java.lang.reflect.Method;
 
 /**
- * Wrapper for a Java method and its arguments (other Invokables)
+ * Wrapper for a pair of Java methods and their arguments (other Nodes), forming an LValue
  *
  * @author TomyLobo
  */
