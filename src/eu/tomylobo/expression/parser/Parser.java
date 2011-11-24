@@ -34,9 +34,11 @@ import eu.tomylobo.expression.runtime.Conditional;
 import eu.tomylobo.expression.runtime.Constant;
 import eu.tomylobo.expression.runtime.For;
 import eu.tomylobo.expression.runtime.Functions;
+import eu.tomylobo.expression.runtime.LValue;
 import eu.tomylobo.expression.runtime.RValue;
 import eu.tomylobo.expression.runtime.Return;
 import eu.tomylobo.expression.runtime.Sequence;
+import eu.tomylobo.expression.runtime.SimpleFor;
 import eu.tomylobo.expression.runtime.Variable;
 import eu.tomylobo.expression.runtime.While;
 
@@ -152,15 +154,50 @@ public class Parser {
                 case 'f': { // for
                     ++position;
                     consumeCharacter('(');
+                    int oldPosition = position;
                     final RValue init = parseExpression(true);
-                    consumeCharacter(';');
-                    final RValue condition = parseExpression(true);
-                    consumeCharacter(';');
-                    final RValue increment = parseExpression(true);
-                    consumeCharacter(')');
-                    final RValue body = parseStatements(true);
+                    //if ((init instanceof LValue) && )
+                    if (peek().id() == ';') {
+                        ++position;
+                        final RValue condition = parseExpression(true);
+                        consumeCharacter(';');
+                        final RValue increment = parseExpression(true);
+                        consumeCharacter(')');
+                        final RValue body = parseStatements(true);
 
-                    statements.add(new For(current.getPosition(), init, condition, increment, body));
+                        statements.add(new For(current.getPosition(), init, condition, increment, body));
+                    }
+                    else {
+                        position = oldPosition;
+
+                        final Token variableToken = peek();
+                        if (!(variableToken instanceof IdentifierToken)) {
+                            throw new ParserException(variableToken.getPosition(), "Expected identifier");
+                        }
+
+                        // In theory, I should have to create non-existant variables here.
+                        // However, the java-for parsing attempt further up already takes care of that :) 
+                        RValue variable = variables.get(((IdentifierToken) variableToken).value);
+                        if (!(variable instanceof LValue)) {
+                            throw new ParserException(variableToken.getPosition(), "Expected variable");
+                        }
+
+                        ++position;
+
+                        final Token equalsToken = peek();
+                        if (!(equalsToken instanceof OperatorToken) || !((OperatorToken) equalsToken).operator.equals("=")) {
+                            throw new ParserException(variableToken.getPosition(), "Expected '=' or a term and ';'");
+                        }
+                        ++position;
+
+                        final RValue first = parseExpression(true);
+                        consumeCharacter(',');
+                        final RValue last = parseExpression(true);
+                        consumeCharacter(')');
+                        final RValue body = parseStatements(true);
+
+                        statements.add(new SimpleFor(current.getPosition(), (LValue) variable, first, last, body));
+                    }
                     break;
                 }
 
