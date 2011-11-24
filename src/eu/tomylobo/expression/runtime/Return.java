@@ -46,6 +46,4 @@ public class Return extends Node {
     public String toString() {
         return "return " + value;
     }
-
-    //TODO: optimizer
 }

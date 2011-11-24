@@ -46,6 +46,4 @@ public class Break extends Node {
     public String toString() {
         return doContinue ? "continue" : "break";
     }
-
-    //TODO: optimizer
 }
