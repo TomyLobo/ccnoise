@@ -21,6 +21,7 @@ package eu.tomylobo.expression;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import eu.tomylobo.expression.lexer.Lexer;
 import eu.tomylobo.expression.lexer.tokens.Token;
@@ -56,6 +57,8 @@ import eu.tomylobo.expression.runtime.Variable;
  * @author TomyLobo
  */
 public class Expression {
+    private static final ThreadLocal<Stack<Expression>> instance = new ThreadLocal<Stack<Expression>>();
+
     private final Map<String, RValue> variables = new HashMap<String, RValue>();
     private final String[] variableNames;
     private RValue root;
@@ -97,10 +100,13 @@ public class Expression {
             ((Variable) invokable).value = values[i];
         }
 
+        pushInstance();
         try {
             return root.getValue();
         } catch (ReturnException e) {
             return e.getValue();
+        } finally {
+            popInstance();
         }
     }
 
@@ -120,5 +126,28 @@ public class Expression {
         }
 
         return variable;
+    }
+
+    public static Expression getInstance() {
+        return instance.get().peek();
+    }
+
+    private void pushInstance() {
+        Stack<Expression> foo = instance.get();
+        if (foo == null) {
+            instance.set(foo = new Stack<Expression>());
+        }
+
+        foo.push(this);
+    }
+
+    private void popInstance() {
+        Stack<Expression> foo = instance.get();
+
+        foo.pop();
+
+        if (foo.isEmpty()) {
+            instance.set(null);
+        }
     }
 }
