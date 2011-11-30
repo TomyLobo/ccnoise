@@ -86,10 +86,8 @@ public class Parser {
 
     private RValue parseStatements(boolean singleStatement) throws ParserException {
         List<RValue> statements = new ArrayList<RValue>();
-        loop: while (true) {
-            if (position >= tokens.size()) {
-                break;
-            }
+        loop: while (position < tokens.size()) {
+            boolean expectSemicolon = false;
 
             final Token current = peek();
             switch (current.id()) {
@@ -100,9 +98,6 @@ public class Parser {
 
                 consumeCharacter('}');
 
-                if (singleStatement) {
-                    break loop;
-                }
                 break;
 
             case '}':
@@ -146,6 +141,8 @@ public class Parser {
                     final RValue condition = parseBracket();
 
                     statements.add(new While(current.getPosition(), condition, body, true));
+
+                    expectSemicolon = true;
                     break;
                 }
 
@@ -176,7 +173,6 @@ public class Parser {
                         if (!(variable instanceof LValue)) {
                             throw new ParserException(variableToken.getPosition(), "Expected variable");
                         }
-
                         ++position;
 
                         final Token equalsToken = peek();
@@ -192,7 +188,7 @@ public class Parser {
                         final RValue body = parseStatements(true);
 
                         statements.add(new SimpleFor(current.getPosition(), (LValue) variable, first, last, body));
-                    }
+                    } // switch (keyword.charAt(0))
                     break;
                 }
 
@@ -210,36 +206,33 @@ public class Parser {
                     ++position;
                     statements.add(new Return(current.getPosition(), parseExpression(true)));
 
-                    if (peek().id() == ';') {
-                        ++position;
-                        break;
-                    } else {
-                        break loop;
-                    }
+                    expectSemicolon = true;
+                    break;
 
                 default:
                     throw new ParserException(current.getPosition(), "Unimplemented keyword '" + keyword + "'");
                 }
 
-                if (singleStatement) {
-                    break loop;
-                }
                 break;
 
             default:
                 statements.add(parseExpression(true));
 
+                expectSemicolon = true;
+            } // switch (current.id())
+
+            if (expectSemicolon) {
                 if (peek().id() == ';') {
                     ++position;
-                    if (singleStatement) {
-                        break loop;
-                    }
-                    break;
                 } else {
-                    break loop;
+                    break;
                 }
             }
-        }
+
+            if (singleStatement) {
+                break;
+            }
+        } // while (position < tokens.size())
 
         switch (statements.size()) {
         case 0:
