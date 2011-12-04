@@ -27,7 +27,7 @@ import java.util.List;
  * @author TomyLobo
  */
 public class Sequence extends Node {
-    private final RValue[] sequence;
+    final RValue[] sequence;
 
     public Sequence(int position, RValue... sequence) {
         super(position);
@@ -66,7 +66,7 @@ public class Sequence extends Node {
 
     @Override
     public RValue optimize() throws EvaluationException {
-        List<RValue> newSequence = new ArrayList<RValue>();
+        final List<RValue> newSequence = new ArrayList<RValue>();
 
         RValue droppedLast = null;
         for (RValue invokable : sequence) {
