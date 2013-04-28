@@ -1,0 +1,13 @@
+*.class
+build/
+download/
+.DS_Store
+
+# Package Files
+*.jar
+*.war
+*.ear
+
+# Project files
+.project
+.classpath

@@ -1,0 +1,17 @@
+[
+{
+  "modid" : "CCNoise",
+  "name" : "CCNoise",
+  "version" : "0.0.1",
+  "url" : "http://www.computercraft.info",
+  "credits" : "",
+  "authors": [
+    "TomyLobo"
+  ],
+  "description": "",
+  "logoFile" : "",
+  "updateUrl" : "",
+  "parent" : "",
+  "screenshots": [
+  ]
+}]
