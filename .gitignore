@@ -11,3 +11,4 @@ download/
 # Project files
 .project
 .classpath
+.settings
