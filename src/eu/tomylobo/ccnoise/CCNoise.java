@@ -2,6 +2,8 @@ package eu.tomylobo.ccnoise;
 
 import eu.tomylobo.ccnoise.common.CommonProxy;
 import eu.tomylobo.ccnoise.common.BlockSpeaker;
+import eu.tomylobo.ccnoise.common.PacketManager;
+import eu.tomylobo.ccnoise.common.SoundSystemUtils;
 import eu.tomylobo.ccnoise.common.TileEntitySpeaker;
 
 import net.minecraft.block.Block;
@@ -9,7 +11,6 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.Configuration;
-import net.minecraftforge.common.Property;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -19,18 +20,31 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import dan200.computer.api.ComputerCraftAPI;
 
-@Mod( modid = "CCNoise", name = "CCNoise", version = "0.0.1", dependencies = "required-after:ComputerCraft;after:CCTurtle")
-@NetworkMod(clientSideRequired = true, serverSideRequired = false)
+@Mod(
+	modid = "CCNoise",
+	name = "CCNoise",
+	version = "0.0.2",
+	dependencies = "required-after:ComputerCraft;after:CCTurtle"
+)
+@NetworkMod(
+	clientSideRequired = true,
+	serverSideRequired = false,
+	channels = PacketManager.CHANNEL_ID,
+	packetHandler = PacketManager.class
+)
 public class CCNoise {
 	public static class Blocks {
 		public static BlockSpeaker speakerBlock;
 	}
 
 	public static class Config {
-		public static int speakerBlockID;
+		public static int speakerBlockID = 1310;
+		public static boolean allowPlayRegularSounds = true;
+		public static boolean allowGenerateSounds = true;
+		public static boolean allowGenerateGlobalSounds = true;
 	}
 
-	@Mod.Instance(value = "CCNoise")
+	@Mod.Instance("CCNoise")
 	public static CCNoise instance;
 
 	@SidedProxy(
@@ -73,10 +87,13 @@ public class CCNoise {
 	public void preInit( FMLPreInitializationEvent evt ) {
 		Configuration configFile = new Configuration(evt.getSuggestedConfigurationFile());
 
-		Property prop = configFile.getBlock("speakerBlockID", 1310);
-		prop.comment = "The block ID for the speaker block";
-		Config.speakerBlockID = prop.getInt();
+		Config.speakerBlockID = configFile.getBlock("speakerBlockID", Config.speakerBlockID, "The block ID for the speaker block").getInt();
+		Config.allowPlayRegularSounds = configFile.get("speaker", "allowPlayRegularSounds", Config.allowPlayRegularSounds, "Allow speaker.playSound to play regular sounds.").getBoolean(Config.allowPlayRegularSounds);
+		Config.allowGenerateSounds = configFile.get("speaker", "allowGenerateSounds", Config.allowGenerateSounds, "Enable the speaker.generate* functions").getBoolean(Config.allowGenerateSounds);
+		Config.allowGenerateGlobalSounds = configFile.get("speaker", "allowGenerateGlobalSounds", Config.allowGenerateGlobalSounds, "Allow the speaker.generate* functions to generate globally accessible sounds and potentially overwrite existing sounds.").getBoolean(Config.allowGenerateGlobalSounds);
 
 		configFile.save();
 	}
+
+	public static SoundSystemUtils ignore1 = new SoundSystemUtils();
 }
