@@ -247,6 +247,19 @@ public final class Functions {
     }
 
 
+    public static final double sign(RValue x) throws EvaluationException {
+        final double value = x.getValue();
+
+        if (value < 0)
+            return -1;
+
+        if (value > 0)
+            return 1;
+
+        return 0;
+    }
+
+
     public static final double rotate(LValue x, LValue y, RValue angle) throws EvaluationException {
         final double f = angle.getValue();
 
