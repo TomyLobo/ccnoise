@@ -277,6 +277,58 @@ public final class Functions {
     }
 
 
+    @Dynamic
+    public static final double whitenoise() throws EvaluationException {
+        return random.nextDouble() * 2 - 1;
+    }
+
+    @Dynamic
+    public static final double brownnoise(RValue last, RValue factor) throws EvaluationException {
+        final double f = 1.0 / factor.getValue();
+        return last.getValue()*(1-f) + whitenoise() * f;
+    }
+
+    @Dynamic
+    public static final double pinknoise() throws EvaluationException {
+        final double level = random.nextDouble();
+
+        double output = whitenoise()*.252;
+        if (level>0.5)
+            return output;
+
+        output += whitenoise()*0.672;
+        if (level>0.25)
+            return output;
+
+        output += whitenoise()*0.000;
+        if (level>0.125)
+            return output;
+
+        output += whitenoise()*0.171;
+        if (level>0.0625)
+            return output;
+
+        output += whitenoise()*0.190;
+        if (level>0.03125)
+            return output;
+
+        output += whitenoise()*0.286;
+        if (level>0.015625)
+            return output;
+
+        output += whitenoise()*0.175;
+        if (level>0.0078125)
+            return output;
+
+        output += whitenoise()*0.233;
+        if (level>0.00390625)
+            return output;
+
+        output += whitenoise()*0.021;
+        return output;
+    }
+
+
     public static final double rotate(LValue x, LValue y, RValue angle) throws EvaluationException {
         final double f = angle.getValue();
 
