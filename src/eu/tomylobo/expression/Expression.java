@@ -28,6 +28,7 @@ import eu.tomylobo.expression.lexer.tokens.Token;
 import eu.tomylobo.expression.parser.Parser;
 import eu.tomylobo.expression.runtime.Constant;
 import eu.tomylobo.expression.runtime.EvaluationException;
+import eu.tomylobo.expression.runtime.Functions;
 import eu.tomylobo.expression.runtime.RValue;
 import eu.tomylobo.expression.runtime.ReturnException;
 import eu.tomylobo.expression.runtime.Variable;
@@ -62,7 +63,7 @@ public class Expression {
     private final Map<String, RValue> variables = new HashMap<String, RValue>();
     private final String[] variableNames;
     private RValue root;
-    private final Map<Integer, double[]> megabuf = new HashMap<Integer, double[]>();
+    private final Functions functions = new Functions();
 
     public static Expression compile(String expression, String... variableNames) throws ExpressionException {
         return new Expression(expression, variableNames);
@@ -152,7 +153,7 @@ public class Expression {
         }
     }
 
-    public Map<Integer, double[]> getMegabuf() {
-        return megabuf;
+    public Functions getFunctions() {
+        return functions;
     }
 }
