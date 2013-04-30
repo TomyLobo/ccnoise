@@ -72,9 +72,11 @@ public final class Functions {
         }
 
         public boolean matches(boolean isSetter, RValue... args) {
-            if (this.isSetter != isSetter) {
+            if (this.isSetter != isSetter)
                 return false;
-            }
+
+            if (this.method.getParameterTypes().length != args.length)
+                return false;
 
             int accum = 0;
             for (RValue argument : args) {
