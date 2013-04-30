@@ -260,6 +260,23 @@ public final class Functions {
     }
 
 
+    public static final double rect(RValue x, RValue frequency) throws EvaluationException {
+        return ((x.getValue() * frequency.getValue()) % 1 < 0.5) ? -1 : 1;
+    }
+
+    public static final double triangle(RValue x, RValue frequency) throws EvaluationException {
+        return Math.abs((x.getValue() * frequency.getValue() * 2 + 1) % 2 - 1) * 2 - 1;
+    }
+
+    public static final double sawtooth(RValue x, RValue frequency) throws EvaluationException {
+        return ((x.getValue() * frequency.getValue()) % 1) * 2 - 1;
+    }
+
+    public static final double sin(RValue x, RValue frequency) throws EvaluationException {
+        return Math.sin(2 * Math.PI * x.getValue() * frequency.getValue());
+    }
+
+
     public static final double rotate(LValue x, LValue y, RValue angle) throws EvaluationException {
         final double f = angle.getValue();
 
