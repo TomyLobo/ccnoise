@@ -95,11 +95,12 @@ public class PacketManager implements IPacketHandler {
 			final byte type = dis.readByte();
 			if (type < 0) {
 				final int dimension = dis.readInt(); // Not really needed, but let's stick it here for good measure
-				if (notchPlayer.dimension != dimension)
+				final World world = notchPlayer.worldObj;
+
+				if (world.getWorldInfo().getDimension() != dimension)
 					return; // This shouldnt be possible, but there is some bug in mc/forge/mystcraft/whatever
 
-				assert(notchPlayer.dimension == dimension);
-				final World world = notchPlayer.worldObj;
+				assert(world.getWorldInfo().getDimension() == dimension);
 				final int x = dis.readInt();
 				final int y = dis.readShort();
 				final int z = dis.readInt();
