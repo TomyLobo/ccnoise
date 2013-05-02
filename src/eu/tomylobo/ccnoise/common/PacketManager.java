@@ -121,6 +121,10 @@ public class PacketManager implements IPacketHandler {
 		catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
+		}
+		catch (RuntimeException e) {
+			e.printStackTrace();
+			throw e;
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
