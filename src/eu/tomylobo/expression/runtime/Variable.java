@@ -18,6 +18,9 @@
 
 package eu.tomylobo.expression.runtime;
 
+import eu.tomylobo.expression.Expression;
+import eu.tomylobo.expression.parser.ParserException;
+
 /**
  * A variable.
  *
@@ -49,5 +52,15 @@ public final class Variable extends Node implements LValue {
     @Override
     public double assign(double value) {
         return this.value = value;
+    }
+
+    @Override
+    public LValue optimize() throws EvaluationException {
+        return this;
+    }
+
+    @Override
+    public LValue bindVariables(Expression expression, boolean preferLValue) throws ParserException {
+        return this;
     }
 }

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import eu.tomylobo.ccnoise.common.TileEntitySpeaker;
 import eu.tomylobo.expression.Expression;
 import eu.tomylobo.expression.runtime.Function.Dynamic;
 
@@ -98,7 +99,8 @@ public final class Functions {
         try {
             Method setter = getMethod(name, true, args);
             return new LValueFunction(position, getter, setter, args);
-        } catch (NoSuchMethodException e) {
+        }
+        catch (NoSuchMethodException e) {
             return new Function(position, getter, args);
         }
     }
@@ -113,7 +115,7 @@ public final class Functions {
             }
         }
 
-        throw new NoSuchMethodException();
+        throw new NoSuchMethodException(); // TODO: return null (check for side-effects first)
     }
 
     private static final Map<String, List<Overload>> functions = new HashMap<String, List<Overload>>();
@@ -260,20 +262,28 @@ public final class Functions {
     }
 
 
-    public static final double rect(RValue x, RValue frequency) throws EvaluationException {
-        return ((x.getValue() * frequency.getValue()) % 1 < 0.5) ? -1 : 1;
+    public static final double rect(LValue state, RValue frequency) throws EvaluationException {
+        double phase = (state.getValue() % 1) + frequency.getValue() / TileEntitySpeaker.SAMPLE_RATE;
+        state.assign(phase);
+        return (phase % 1 < 0.5) ? -1 : 1;
     }
 
-    public static final double triangle(RValue x, RValue frequency) throws EvaluationException {
-        return Math.abs((x.getValue() * frequency.getValue() * 2 + 1) % 2 - 1) * 2 - 1;
+    public static final double triangle(LValue state, RValue frequency) throws EvaluationException {
+        double phase = (state.getValue() % 1) + frequency.getValue() / TileEntitySpeaker.SAMPLE_RATE;
+        state.assign(phase);
+        return Math.abs((phase * 2 + 1) % 2 - 1) * 2 - 1;
     }
 
-    public static final double sawtooth(RValue x, RValue frequency) throws EvaluationException {
-        return ((x.getValue() * frequency.getValue()) % 1) * 2 - 1;
+    public static final double sawtooth(LValue state, RValue frequency) throws EvaluationException {
+        double phase = (state.getValue() % 1) + frequency.getValue() / TileEntitySpeaker.SAMPLE_RATE;
+        state.assign(phase);
+        return (phase % 1) * 2 - 1;
     }
 
-    public static final double sin(RValue x, RValue frequency) throws EvaluationException {
-        return Math.sin(2 * Math.PI * x.getValue() * frequency.getValue());
+    public static final double sine(LValue state, RValue frequency) throws EvaluationException {
+        double phase = (state.getValue() % 1) + frequency.getValue() / TileEntitySpeaker.SAMPLE_RATE;
+        state.assign(phase);
+        return Math.sin(2 * Math.PI * phase);
     }
 
 

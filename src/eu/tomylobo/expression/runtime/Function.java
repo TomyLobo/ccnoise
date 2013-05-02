@@ -23,6 +23,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import eu.tomylobo.expression.Expression;
+import eu.tomylobo.expression.parser.ParserException;
+
 /**
  * Wrapper for a Java method and its arguments (other Nodes)
  *
@@ -104,11 +107,19 @@ public class Function extends Node {
         if (optimizable) {
             return new Constant(position, invokeMethod(method, optimizedArgs));
         }
-        else if (this instanceof LValueFunction) {
-            return new LValueFunction(position, method, ((LValueFunction) this).setter, optimizedArgs);
-        }
         else {
             return new Function(position, method, optimizedArgs);
         }
+    }
+
+    @Override
+    public RValue bindVariables(Expression expression, boolean preferLValue) throws ParserException {
+        Class<?>[] parameters = method.getParameterTypes();
+        for (int i = 0; i < args.length; ++i) {
+            final boolean argumentPrefersLValue = LValue.class.isAssignableFrom(parameters[i]);
+            args[i] = args[i].bindVariables(expression, argumentPrefersLValue);
+        }
+
+        return this;
     }
 }

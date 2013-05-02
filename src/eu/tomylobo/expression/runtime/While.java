@@ -18,6 +18,9 @@
 
 package eu.tomylobo.expression.runtime;
 
+import eu.tomylobo.expression.Expression;
+import eu.tomylobo.expression.parser.ParserException;
+
 /**
  * A while loop.
  *
@@ -50,10 +53,12 @@ public class While extends Node {
 
                 try {
                     ret = body.getValue();
-                } catch (BreakException e) {
+                }
+                catch (BreakException e) {
                     if (e.doContinue) {
                         continue;
-                    } else {
+                    }
+                    else {
                         break;
                     }
                 }
@@ -67,10 +72,12 @@ public class While extends Node {
 
                 try {
                     ret = body.getValue();
-                } catch (BreakException e) {
+                }
+                catch (BreakException e) {
                     if (e.doContinue) {
                         continue;
-                    } else {
+                    }
+                    else {
                         break;
                     }
                 }
@@ -89,7 +96,8 @@ public class While extends Node {
     public String toString() {
         if (footChecked) {
             return "do { " + body + " } while (" + condition + ")";
-        } else {
+        }
+        else {
             return "while (" + condition + ") { " + body + " }";
         }
     }
@@ -110,5 +118,13 @@ public class While extends Node {
         }
 
         return new While(getPosition(), newCondition, body.optimize(), footChecked);
+    }
+
+    @Override
+    public RValue bindVariables(Expression expression, boolean preferLValue) throws ParserException {
+        condition = condition.bindVariables(expression, false);
+        body = body.bindVariables(expression, false);
+
+        return this;
     }
 }

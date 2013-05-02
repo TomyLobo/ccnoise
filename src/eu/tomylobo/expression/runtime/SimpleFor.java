@@ -18,6 +18,9 @@
 
 package eu.tomylobo.expression.runtime;
 
+import eu.tomylobo.expression.Expression;
+import eu.tomylobo.expression.parser.ParserException;
+
 /**
  * A simple-style for loop.
  *
@@ -55,10 +58,12 @@ public class SimpleFor extends Node {
             try {
                 counter.assign(i);
                 ret = body.getValue();
-            } catch (BreakException e) {
+            }
+            catch (BreakException e) {
                 if (e.doContinue) {
                     continue;
-                } else {
+                }
+                else {
                     break;
                 }
             }
@@ -82,5 +87,15 @@ public class SimpleFor extends Node {
         // TODO: unroll small loops into Sequences
 
         return new SimpleFor(getPosition(), (LValue) counter.optimize(), first.optimize(), last.optimize(), body.optimize());
+    }
+
+    @Override
+    public RValue bindVariables(Expression expression, boolean preferLValue) throws ParserException {
+        counter = counter.bindVariables(expression, true);
+        first = first.bindVariables(expression, false);
+        last = last.bindVariables(expression, false);
+        body = body.bindVariables(expression, false);
+
+        return this;
     }
 }

@@ -264,18 +264,18 @@ public final class ParserProcessors {
             switch (partsFound) {
             case 0:
                 if (character == '?') {
-                    System.out.println("question mark found");
                     partsFound = 1;
-                } else {
+                }
+                else {
                     lhs.addLast(identifiable);
                 }
                 break;
 
             case 1:
                 if (conditionalsFound == 0 && character == ':') {
-                    System.out.println("matching colon found");
                     partsFound = 2;
-                } else {
+                }
+                else {
                     mhs.addLast(identifiable);
                 }
                 break;

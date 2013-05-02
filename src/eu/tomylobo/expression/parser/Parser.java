@@ -32,6 +32,7 @@ import eu.tomylobo.expression.runtime.Break;
 import eu.tomylobo.expression.runtime.Conditional;
 import eu.tomylobo.expression.runtime.Constant;
 import eu.tomylobo.expression.runtime.For;
+import eu.tomylobo.expression.runtime.Function;
 import eu.tomylobo.expression.runtime.Functions;
 import eu.tomylobo.expression.runtime.LValue;
 import eu.tomylobo.expression.runtime.RValue;
@@ -83,6 +84,9 @@ public class Parser {
             final Token token = peek();
             throw new ParserException(token.getPosition(), "Extra token at the end of the input: " + token);
         }
+
+        ret.bindVariables(expression, false);
+
         return ret;
     }
 
@@ -117,7 +121,8 @@ public class Parser {
                     if (hasKeyword("else")) {
                         ++position;
                         falsePart = parseStatements(true);
-                    } else {
+                    }
+                    else {
                         falsePart = null;
                     }
 
@@ -167,7 +172,8 @@ public class Parser {
                         final RValue body = parseStatements(true);
 
                         statements.add(new For(current.getPosition(), init, condition, increment, body));
-                    } else {
+                    }
+                    else {
                         position = oldPosition;
 
                         final Token variableToken = peek();
@@ -249,12 +255,14 @@ public class Parser {
 
                             consumeCharacter(':');
                             caseStatements.add(parseStatements(false));
-                        } else if (hasKeyword("default")) {
+                        }
+                        else if (hasKeyword("default")) {
                             ++position;
 
                             consumeCharacter(':');
                             defaultCase = parseStatements(false);
-                        } else {
+                        }
+                        else {
                             throw new ParserException(current.getPosition(), "Expected 'case' or 'default' instead of " + peek());
                         }
                     }
@@ -265,9 +273,6 @@ public class Parser {
 
                 default:
                     throw new ParserException(current.getPosition(), "Unexpected keyword '" + keyword + "'");
-                }
-                switch (1) {
-                default:
                 }
 
                 break;
@@ -281,7 +286,8 @@ public class Parser {
             if (expectSemicolon) {
                 if (peek().id() == ';') {
                     ++position;
-                } else {
+                }
+                else {
                     break;
                 }
             }
@@ -331,13 +337,13 @@ public class Parser {
                     halfProcessed.add(parseFunctionCall(identifierToken));
                 }
                 else {
-                    // Ugly hack to make temporary variables work while not sacrificing error reporting.
-                    final boolean isSimpleAssignment = next instanceof OperatorToken && ((OperatorToken) next).operator.equals("=");
-                    RValue variable = expression.getVariable(identifierToken.value, isSimpleAssignment);
+                    final RValue variable = expression.getVariable(identifierToken.value, false);
                     if (variable == null) {
-                        throw new ParserException(current.getPosition(), "Variable '" + identifierToken.value + "' not found");
+                        halfProcessed.add(new UnboundVariable(identifierToken.getPosition(), identifierToken.value));
                     }
-                    halfProcessed.add(variable);
+                    else {
+                        halfProcessed.add(variable);
+                    }
                 }
                 expressionStart = false;
                 break;
@@ -389,7 +395,7 @@ public class Parser {
         return tokens.get(position);
     }
 
-    private Identifiable parseFunctionCall(IdentifierToken identifierToken) throws ParserException {
+    private Function parseFunctionCall(IdentifierToken identifierToken) throws ParserException {
         consumeCharacter('(');
 
         try {

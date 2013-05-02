@@ -18,6 +18,9 @@
 
 package eu.tomylobo.expression.runtime;
 
+import eu.tomylobo.expression.Expression;
+import eu.tomylobo.expression.parser.ParserException;
+
 /**
  * A value that can be used on the left side of an assignment.
  *
@@ -25,4 +28,8 @@ package eu.tomylobo.expression.runtime;
  */
 public interface LValue extends RValue {
     public double assign(double value) throws EvaluationException;
+
+    public LValue optimize() throws EvaluationException;
+
+    public LValue bindVariables(Expression expression, boolean preferLValue) throws ParserException;
 }

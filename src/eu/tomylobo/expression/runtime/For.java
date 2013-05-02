@@ -18,6 +18,9 @@
 
 package eu.tomylobo.expression.runtime;
 
+import eu.tomylobo.expression.Expression;
+import eu.tomylobo.expression.parser.ParserException;
+
 /**
  * A Java/C-style for loop.
  *
@@ -51,10 +54,12 @@ public class For extends Node {
 
             try {
                 ret = body.getValue();
-            } catch (BreakException e) {
+            }
+            catch (BreakException e) {
                 if (e.doContinue) {
                     continue;
-                } else {
+                }
+                else {
                     break;
                 }
             }
@@ -85,5 +90,15 @@ public class For extends Node {
 
         //return new Sequence(getPosition(), init.optimize(), new While(getPosition(), condition, new Sequence(getPosition(), body, increment), false)).optimize();
         return new For(getPosition(), init.optimize(), newCondition, increment.optimize(), body.optimize());
+    }
+
+    @Override
+    public RValue bindVariables(Expression expression, boolean preferLValue) throws ParserException {
+        init = init.bindVariables(expression, false);
+        condition = condition.bindVariables(expression, false);
+        increment = increment.bindVariables(expression, false);
+        body = body.bindVariables(expression, false);
+
+        return this;
     }
 }

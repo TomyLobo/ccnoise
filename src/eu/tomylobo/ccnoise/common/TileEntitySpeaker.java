@@ -67,7 +67,7 @@ public class TileEntitySpeaker extends TileEntity implements IPeripheral, Packet
 		"eval",
 		"generateFunctional",
 	};
-	private static final double SAMPLE_RATE = 44100;
+	public static final double SAMPLE_RATE = 44100;
 	private static final byte ID_GENERATE_FUNCTIONAL = (byte) -1;
 	private static final byte ID_MULTIPACKET = (byte) -2;
 
@@ -137,6 +137,7 @@ public class TileEntitySpeaker extends TileEntity implements IPeripheral, Packet
 
 	@Override
 	public void detach(IComputerAccess computer) {
+		//TODO: In SMP, this isn't working. Sound continues to be loaded after a computer reboot
 		for (String soundName : computers.remove(computer.getID()).keySet()) {
 			SoundSystemUtils.removeSound(soundName);
 		}

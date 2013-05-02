@@ -18,6 +18,9 @@
 
 package eu.tomylobo.expression.runtime;
 
+import eu.tomylobo.expression.Expression;
+import eu.tomylobo.expression.parser.ParserException;
+
 /**
  * An if/else statement or a ternary operator.
  *
@@ -40,7 +43,8 @@ public class Conditional extends Node {
     public double getValue() throws EvaluationException {
         if (condition.getValue() > 0.0) {
             return truePart.getValue();
-        } else {
+        }
+        else {
             return falsePart == null ? 0.0 : falsePart.getValue();
         }
     }
@@ -54,9 +58,11 @@ public class Conditional extends Node {
     public String toString() {
         if (falsePart == null) {
             return "if (" + condition + ") { " + truePart + " }";
-        } else if (truePart instanceof Sequence || falsePart instanceof Sequence) {
+        }
+        else if (truePart instanceof Sequence || falsePart instanceof Sequence) {
             return "if (" + condition + ") { " + truePart + " } else { " + falsePart + " }";
-        } else {
+        }
+        else {
             return "(" + condition + ") ? (" + truePart + ") : (" + falsePart + ")";
         }
     }
@@ -68,11 +74,21 @@ public class Conditional extends Node {
         if (newCondition instanceof Constant) {
             if (newCondition.getValue() > 0) {
                 return truePart.optimize();
-            } else {
+            }
+            else {
                 return falsePart == null ? new Constant(getPosition(), 0.0) : falsePart.optimize();
             }
         }
 
         return new Conditional(getPosition(), newCondition, truePart.optimize(), falsePart == null ? null : falsePart.optimize());
+    }
+
+    @Override
+    public RValue bindVariables(Expression expression, boolean preferLValue) throws ParserException {
+        condition = condition.bindVariables(expression, false);
+        truePart = truePart.bindVariables(expression, false);
+        falsePart = falsePart.bindVariables(expression, false);
+
+        return this;
     }
 }

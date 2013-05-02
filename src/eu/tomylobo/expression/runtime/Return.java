@@ -18,6 +18,9 @@
 
 package eu.tomylobo.expression.runtime;
 
+import eu.tomylobo.expression.Expression;
+import eu.tomylobo.expression.parser.ParserException;
+
 /**
  * A return statement.
  *
@@ -45,5 +48,12 @@ public class Return extends Node {
     @Override
     public String toString() {
         return "return " + value;
+    }
+
+    @Override
+    public RValue bindVariables(Expression expression, boolean preferLValue) throws ParserException {
+        value = value.bindVariables(expression, false);
+
+        return this;
     }
 }

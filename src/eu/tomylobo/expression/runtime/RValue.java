@@ -18,7 +18,9 @@
 
 package eu.tomylobo.expression.runtime;
 
+import eu.tomylobo.expression.Expression;
 import eu.tomylobo.expression.Identifiable;
+import eu.tomylobo.expression.parser.ParserException;
 
 /**
  * A value that can be used on the right side of an assignment.
@@ -29,4 +31,6 @@ public interface RValue extends Identifiable {
     public double getValue() throws EvaluationException;
 
     public RValue optimize() throws EvaluationException;
+
+    public RValue bindVariables(Expression expression, boolean preferLValue) throws ParserException;
 }

@@ -18,6 +18,9 @@
 
 package eu.tomylobo.expression.runtime;
 
+import eu.tomylobo.expression.Expression;
+import eu.tomylobo.expression.parser.ParserException;
+
 /**
  * A node in the execution tree of an expression.
  *
@@ -40,5 +43,10 @@ public abstract class Node implements RValue {
     @Override
     public final int getPosition() {
         return position;
+    }
+
+    @Override
+    public RValue bindVariables(Expression expression, boolean preferLValue) throws ParserException {
+        return this;
     }
 }

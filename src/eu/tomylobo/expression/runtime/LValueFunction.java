@@ -20,6 +20,9 @@ package eu.tomylobo.expression.runtime;
 
 import java.lang.reflect.Method;
 
+import eu.tomylobo.expression.Expression;
+import eu.tomylobo.expression.parser.ParserException;
+
 /**
  * Wrapper for a pair of Java methods and their arguments (other Nodes), forming an LValue
  *
@@ -27,10 +30,11 @@ import java.lang.reflect.Method;
  */
 public class LValueFunction extends Function implements LValue {
     private final Object[] setterArgs;
-    final Method setter;
+    private final Method setter;
 
     LValueFunction(int position, Method getter, Method setter, RValue... args) {
         super(position, getter, args);
+        assert (getter.isAnnotationPresent(Dynamic.class));
 
         setterArgs = new Object[args.length + 1];
         System.arraycopy(args, 0, setterArgs, 0, args.length);
@@ -46,5 +50,26 @@ public class LValueFunction extends Function implements LValue {
     public double assign(double value) throws EvaluationException {
         setterArgs[setterArgs.length - 1] = value;
         return invokeMethod(setter, setterArgs);
+    }
+
+    @Override
+    public LValue optimize() throws EvaluationException {
+        final RValue optimized = super.optimize();
+        if (optimized == this) {
+            return this;
+        }
+
+        if (optimized instanceof Function) {
+            return new LValueFunction(optimized.getPosition(), method, setter, ((Function) optimized).args);
+        }
+
+        return (LValue) optimized;
+    }
+
+    @Override
+    public LValue bindVariables(Expression expression, boolean preferLValue) throws ParserException {
+        super.bindVariables(expression, preferLValue);
+
+        return this;
     }
 }

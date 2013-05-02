@@ -25,16 +25,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import eu.tomylobo.expression.Expression;
+import eu.tomylobo.expression.parser.ParserException;
+
 /**
  * A switch/case construct.
  *
  * @author TomyLobo
  */
 public class Switch extends Node implements RValue {
-    private final RValue parameter;
+    private RValue parameter;
     private final Map<Double, Integer> valueMap;
     private final RValue[] caseStatements;
-    private final RValue defaultCase;
+    private RValue defaultCase;
 
     public Switch(int position, RValue parameter, List<Double> values, List<RValue> caseStatements, RValue defaultCase) {
         this(position, parameter, invertList(values), caseStatements, defaultCase);
@@ -78,7 +81,8 @@ public class Switch extends Node implements RValue {
             }
 
             return defaultCase == null ? ret : defaultCase.getValue();
-        } catch (BreakException e) {
+        }
+        catch (BreakException e) {
             if (e.doContinue) throw e;
 
             return 0.0;
@@ -144,7 +148,8 @@ public class Switch extends Node implements RValue {
 
                         newSequence.add(subInvokable);
                     }
-                } else {
+                }
+                else {
                     newSequence.add(invokable);
                 }
             }
@@ -156,7 +161,8 @@ public class Switch extends Node implements RValue {
                     for (RValue subInvokable : ((Sequence) invokable).sequence) {
                         newSequence.add(subInvokable);
                     }
-                } else {
+                }
+                else {
                     newSequence.add(invokable);
                 }
             }
@@ -183,11 +189,25 @@ public class Switch extends Node implements RValue {
                 for (RValue subInvokable : ((Sequence) invokable).sequence) {
                     newSequence.add(subInvokable);
                 }
-            } else {
+            }
+            else {
                 newSequence.add(invokable);
             }
         }
 
         return new Switch(getPosition(), optimizedParameter, newValueMap, newSequence, defaultCase.optimize());
+    }
+
+    @Override
+    public RValue bindVariables(Expression expression, boolean preferLValue) throws ParserException {
+        parameter = parameter.bindVariables(expression, false);
+
+        for (int i = 0; i < caseStatements.length; ++i) {
+            caseStatements[i] = caseStatements[i].bindVariables(expression, false);
+        }
+
+        defaultCase = defaultCase.bindVariables(expression, false);
+
+        return this;
     }
 }
