@@ -19,7 +19,7 @@
 
 	<property name="mc.version"          value="1.4.7"/>
 	<property name="forge.version"       value="6.6.0.518"/>
-	<property name="mod.version"         value="0.0.4a"/>
+	<property name="mod.version"         value="0.0.4b"/>
 	<property name="mod.name"            value="CCNoise"/>
 
 	<property name="forge.name"          value="minecraftforge-src-${mc.version}-${forge.version}.zip"/>
