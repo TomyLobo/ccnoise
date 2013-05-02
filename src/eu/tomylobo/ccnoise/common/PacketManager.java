@@ -6,15 +6,21 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetworkManager;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.Packet250CustomPayload;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.network.IPacketHandler;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
@@ -52,7 +58,6 @@ public class PacketManager implements IPacketHandler {
 		}
 
 
-
 		public void sendToServer() {
 			PacketDispatcher.sendPacketToServer(toPacket());
 		}
@@ -66,7 +71,25 @@ public class PacketManager implements IPacketHandler {
 		}
 
 		public void sendToAllInDimension(int dimensionId) {
-			PacketDispatcher.sendPacketToAllInDimension( toPacket(), dimensionId);
+			//PacketDispatcher.sendPacketToAllInDimension(toPacket(), dimensionId);
+
+			MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+			if (server == null) {
+				FMLLog.fine("Attempt to send packet to all in dimension without a server instance available");
+				return;
+			}
+
+			ServerConfigurationManager r = server.getConfigurationManager();
+
+			@SuppressWarnings("unchecked")
+			final List<? extends EntityPlayerMP> playerEntityList = r.playerEntityList;
+
+			for (EntityPlayerMP player : playerEntityList) {
+				if (player.worldObj.getWorldInfo().getDimension() != dimensionId)
+					continue;
+
+				player.playerNetServerHandler.sendPacketToPlayer(toPacket());
+			}
 		}
 
 		public void sendToAllAround(double x, double y, double z, double range, int dimensionId) {
@@ -89,7 +112,7 @@ public class PacketManager implements IPacketHandler {
 	public void onPacketData(INetworkManager manager, Packet250CustomPayload packet, Player player) {
 		final EntityPlayer notchPlayer = (EntityPlayer) player;
 
-		DataInputStream dis = new DataInputStream(new ByteArrayInputStream(packet.data));
+		final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(packet.data));
 
 		try {
 			final byte type = dis.readByte();
