@@ -5,4 +5,8 @@ public class CommonProxy {
 
 	public void init() {
 	}
+
+	public void debugPrint(String format, Object... args) {
+		System.out.println(String.format(format, args));
+	}
 }
