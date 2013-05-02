@@ -211,7 +211,7 @@ public class TileEntitySpeaker extends TileEntity implements IPeripheral, Packet
 		final byte[] data = new byte[samples*2];
 		for (int i = 0; i < samples; ++i) {
 			final double t = i / SAMPLE_RATE;
-			final double y = compiled.evaluate(t);
+			final double y = Math.max(-1, Math.min(1, compiled.evaluate(t)));
 			final short sample = (short) (y * Short.MAX_VALUE);
 
 			// Write sample in little-endian order, as that's the only order SoundSystem supports
