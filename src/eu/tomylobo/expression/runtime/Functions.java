@@ -262,28 +262,24 @@ public final class Functions {
     }
 
 
+    public static double _integrate(LValue state, RValue frequency) throws EvaluationException {
+        return state.assign((state.getValue() % 1) + frequency.getValue() / TileEntitySpeaker.SAMPLE_RATE);
+    }
+
     public static final double rect(LValue state, RValue frequency) throws EvaluationException {
-        double phase = (state.getValue() % 1) + frequency.getValue() / TileEntitySpeaker.SAMPLE_RATE;
-        state.assign(phase);
-        return (phase % 1 < 0.5) ? -1 : 1;
+        return (_integrate(state, frequency) % 1 < 0.5) ? -1 : 1;
     }
 
     public static final double triangle(LValue state, RValue frequency) throws EvaluationException {
-        double phase = (state.getValue() % 1) + frequency.getValue() / TileEntitySpeaker.SAMPLE_RATE;
-        state.assign(phase);
-        return Math.abs((phase * 2 + 1) % 2 - 1) * 2 - 1;
+        return Math.abs((_integrate(state, frequency) * 2 + 1) % 2 - 1) * 2 - 1;
     }
 
     public static final double sawtooth(LValue state, RValue frequency) throws EvaluationException {
-        double phase = (state.getValue() % 1) + frequency.getValue() / TileEntitySpeaker.SAMPLE_RATE;
-        state.assign(phase);
-        return (phase % 1) * 2 - 1;
+        return (_integrate(state, frequency) % 1) * 2 - 1;
     }
 
     public static final double sine(LValue state, RValue frequency) throws EvaluationException {
-        double phase = (state.getValue() % 1) + frequency.getValue() / TileEntitySpeaker.SAMPLE_RATE;
-        state.assign(phase);
-        return Math.sin(2 * Math.PI * phase);
+        return Math.sin(2 * Math.PI * _integrate(state, frequency));
     }
 
 
