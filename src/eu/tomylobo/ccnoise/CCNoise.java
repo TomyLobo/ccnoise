@@ -23,7 +23,7 @@ import dan200.computer.api.ComputerCraftAPI;
 @Mod(
 	modid = "CCNoise",
 	name = "CCNoise",
-	version = "0.0.2",
+	version = "0.0.3",
 	dependencies = "required-after:ComputerCraft;after:CCTurtle"
 )
 @NetworkMod(
