@@ -275,7 +275,7 @@ public final class Functions {
     }
 
     public static final double sawtooth(LValue state, RValue frequency) throws EvaluationException {
-        return (_integrate(state, frequency) % 1) * 2 - 1;
+        return _integrate(state, frequency) % 1;
     }
 
     public static final double sine(LValue state, RValue frequency) throws EvaluationException {
