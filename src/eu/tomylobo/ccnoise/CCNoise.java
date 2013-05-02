@@ -89,8 +89,8 @@ public class CCNoise {
 
 		Config.speakerBlockID = configFile.getBlock("speakerBlockID", Config.speakerBlockID, "The block ID for the speaker block").getInt();
 		Config.allowPlayRegularSounds = configFile.get("speaker", "allowPlayRegularSounds", Config.allowPlayRegularSounds, "Allow speaker.playSound to play regular sounds.").getBoolean(Config.allowPlayRegularSounds);
-		Config.allowGenerateSounds = configFile.get("speaker", "allowGenerateSounds", Config.allowGenerateSounds, "Enable the speaker.generate* functions").getBoolean(Config.allowGenerateSounds);
-		Config.allowGenerateGlobalSounds = configFile.get("speaker", "allowGenerateGlobalSounds", Config.allowGenerateGlobalSounds, "Allow the speaker.generate* functions to generate globally accessible sounds and potentially overwrite existing sounds.").getBoolean(Config.allowGenerateGlobalSounds);
+		Config.allowGenerateSounds = configFile.get("speaker", "allowGenerateSounds", Config.allowGenerateSounds, "Enable the speaker.generate* functions.").getBoolean(Config.allowGenerateSounds);
+		Config.allowGenerateGlobalSounds = configFile.get("speaker", "allowGenerateGlobalSounds", Config.allowGenerateGlobalSounds, "Allow the speaker.generate* functions to generate globally accessible sounds and potentially override existing sounds.").getBoolean(Config.allowGenerateGlobalSounds);
 
 		configFile.save();
 	}
