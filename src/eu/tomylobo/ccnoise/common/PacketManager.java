@@ -95,6 +95,9 @@ public class PacketManager implements IPacketHandler {
 			final byte type = dis.readByte();
 			if (type < 0) {
 				final int dimension = dis.readInt(); // Not really needed, but let's stick it here for good measure
+				if (notchPlayer.dimension != dimension)
+					return; // This shouldnt be possible, but there is some bug in mc/forge/mystcraft/whatever
+
 				assert(notchPlayer.dimension == dimension);
 				final World world = notchPlayer.worldObj;
 				final int x = dis.readInt();
@@ -103,10 +106,12 @@ public class PacketManager implements IPacketHandler {
 
 				final TileEntity te = world.getBlockTileEntity(x, y, z);
 				if (te == null)
-					throw new RuntimeException("CCNoise TileEntity payload package sent to block without TileEntity!");
+					return;
 
-				if (!(te instanceof PacketHandler))
-					throw new RuntimeException("CCNoise TileEntity payload package sent to non-PacketHandler TileEntity!");
+				if (!(te instanceof PacketHandler)) {
+					System.err.println("CCNoise TileEntity payload package sent to non-PacketHandler TileEntity!");
+					return;
+				}
 
 				((PacketHandler) te).handlePacket(type, manager, dis, player);
 			}
