@@ -1,0 +1,14 @@
+- The speaker block has two front sides when dropped to the floor as an item.
+	- custom renderer?
+- CCNoise does not behave well when the sound is set to 0%. If you connect to a server that has generated sounds loaded, the client crashes.
+	- Lazy sound generation
+		- forge sound system init event
+	- check if setting to 0 and back breaks anything
+		- also keep a list of all generated sounds so i can handle the 
+
+Possible regressions - unconfirmed:
+- In SMP, generated sounds might not be unloaded on the client after a computer reboots.
+
+
+Hard to fix:
+- Sound names cannot end in a digit.
