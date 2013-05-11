@@ -16,9 +16,12 @@ public class ClientProxy extends CommonProxy {
 		super.debugPrint(format, args);
 
 		Minecraft mc = FMLClientHandler.instance().getClient();
-		if (mc.ingameGUI != null)
-		{
-			mc.ingameGUI.getChatGUI().printChatMessage(String.format(format, args));
-		}
+		if (mc == null)
+			return;
+
+		if (mc.ingameGUI == null)
+			return;
+
+		mc.ingameGUI.getChatGUI().printChatMessage(String.format(format, args));
 	}
 }
